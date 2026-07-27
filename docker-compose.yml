@@ -4,7 +4,7 @@ services:
     container_name: cinecall_db
     restart: always
     env_file:
-      - /infra/conf/.env
+      - infra/conf/.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -15,7 +15,7 @@ services:
     container_name: cinecall_waha
     restart: always
     env_file:
-      - /infra/conf/.env
+      - infra/conf/.env
     ports:
       - "3000:3000"
     networks:
@@ -30,7 +30,7 @@ services:
     ports:
       - "5000:5000"
     env_file:
-      - /infra/conf/.env
+      - infra/conf/.env
     depends_on:
       - postgres
       - waha
@@ -46,7 +46,7 @@ services:
     ports:
       - "8080:3000"
     env_file:
-      - /infra/conf/.env
+      - infra/conf/.env
 
 volumes:
   postgres_data:
