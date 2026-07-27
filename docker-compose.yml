@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cinecall_db
+    restart: always
+    env_file:
+      - /infra/conf/.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cinecall_net
+
+  waha:
+    image: devlikeapro/waha:latest
+    container_name: cinecall_waha
+    restart: always
+    env_file:
+      - /infra/conf/.env
+    ports:
+      - "3000:3000"
+    networks:
+      - cinecall_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cinecall_backend
+    restart: always
+    ports:
+      - "5000:5000"
+    env_file:
+      - /infra/conf/.env
+    depends_on:
+      - postgres
+      - waha
+    networks:
+      - cinecall_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cinecall_frontend
+    restart: always
+    ports:
+      - "8080:3000"
+    env_file:
+      - /infra/conf/.env
+
+volumes:
+  postgres_data:
+
+networks:
+  cinecall_net:
+    driver: bridge

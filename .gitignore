@@ -1,0 +1,32 @@
+# Ignore custom maintenance/seed scripts
+scripts/
+*.sh
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+.next/
+out/
+bin/
+obj/
+
+# Local database backups and dump files
+*.sql
+*.dump
+*.tar.gz
+
+# Environment files containing secrets
+.env
+.env.local
+.env.production
+backend/appsettings.Development.json
+
+# System & IDE files
+.DS_Store
+.vscode/
+.idea/
+
+# Additional secret files
+backend/appsettings.json
