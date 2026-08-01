@@ -1,19 +1,23 @@
+## CineCall a Confia na Call movie night manager
+
 Configure you infra/conf/.env based on the example
 
+```
 docker compose up -d --build
+```
 
 access your waha dashboard and make sure to connect / scan with your phone
 
 connect to the app and enjoy :)
 
 
--- few reference commands --
+# few reference commands
 
-# build backend
+- build backend
 docker compose build --no-cache backend
 
-#list all tables
+- list all tables
 docker compose exec postgres psql -U <user> -d <db> -c '\dt'
 
-#full reset
+- full reset
 docker compose exec -T postgres psql -U <user> -d <db> < init.sql
