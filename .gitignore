@@ -30,3 +30,7 @@ backend/appsettings.Development.json
 
 # Additional secret files
 backend/appsettings.json
+
+# JS package lock files
+package-lock.json
+yarn.lock
