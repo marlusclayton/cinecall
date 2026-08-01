@@ -81,7 +81,7 @@ public class CyclesController : ControllerBase
                 int id = item.GetProperty("id").GetInt32();
                 string title = item.GetProperty("title").GetString() ?? "";
                 string overview = item.TryGetProperty("overview", out var ov) && ov.ValueKind != JsonValueKind.Null ? ov.GetString() ?? "" : "";
-                string posterPath = item.TryGetProperty("poster_path", out var p) && p.ValueKind != JsonValueKind.Null ? p.GetString() : null;
+                string? posterPath = item.TryGetProperty("poster_path", out var p) && p.ValueKind != JsonValueKind.Null ? p.GetString() : null;
                 string releaseDate = item.TryGetProperty("release_date", out var rd) && rd.ValueKind != JsonValueKind.Null ? rd.GetString() ?? "" : "";
 
                 string yearDisplay = "";
@@ -316,7 +316,7 @@ public class CyclesController : ControllerBase
 
         var options = activeCycle.Nominations.Select(n => n.Title).ToList();
         var chatId = _config["WAHA_CHAT_ID"] ?? _config["WHATSAPP_CHAT_ID"] ?? "120363419707406231@g.us";
-        var wahaUrl = _config["WAHA_URL"] ?? "http://movie_waha:3000";
+        var wahaUrl = _config["WAHA_URL"] ?? "http://waha:3000";
         var apiKey = _config["WAHA_API_KEY"] ?? _config["WHATSAPP_API_KEY"] ?? "movieclub123secret";
         var session = _config["WAHA_SESSION"] ?? "default";
 
@@ -364,7 +364,7 @@ public class CyclesController : ControllerBase
     private async Task<IActionResult> SendWahaTextMessage(string textMessage, HttpClient client)
     {
         var chatId = _config["WAHA_CHAT_ID"] ?? _config["WHATSAPP_CHAT_ID"] ?? "120363419707406231@g.us";
-        var wahaUrl = _config["WAHA_URL"] ?? "http://movie_waha:3000";
+        var wahaUrl = _config["WAHA_URL"] ?? "http://waha:3000";
         var apiKey = _config["WAHA_API_KEY"] ?? _config["WHATSAPP_API_KEY"] ?? "movieclub123secret";
         var session = _config["WAHA_SESSION"] ?? "default";
 

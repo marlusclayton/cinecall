@@ -35,6 +35,13 @@ interface TmdbSearchResult {
 
 const PLACEHOLDER_POSTER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='150' viewBox='0 0 100 150'><rect width='100' height='150' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-size='24'>🎬</text></svg>";
 
+// AdminControls.tsx and NominationForm.tsx both fall back to localhost:5000
+// when NEXT_PUBLIC_API_URL isn't baked into the build. This page was missing
+// that fallback, so when the env var wasn't set at build time, every fetch
+// below hit "undefined/api/..." and silently failed - leaving `categories`
+// empty and the SpinWheel with nothing to draw.
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export default function Dashboard() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [activeCycle, setActiveCycle] = useState<Cycle | null>(null);
@@ -55,8 +62,8 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     try {
       const [catRes, cycleRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cycles/active`),
+        fetch(`${API_URL}/api/categories`),
+        fetch(`${API_URL}/api/cycles/active`),
       ]);
 
       if (catRes.ok) setCategories(await catRes.json());
@@ -75,7 +82,7 @@ export default function Dashboard() {
 
   const handleCategorySelected = async (category: Category) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cycles/start`, {
+      const res = await fetch(`${API_URL}/api/cycles/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ categoryId: category.id }),
@@ -91,7 +98,7 @@ export default function Dashboard() {
     if (!confirm('Tem certeza que deseja remover esta indicação?')) return;
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cycles/nominations/${id}`, {
+      const res = await fetch(`${API_URL}/api/cycles/nominations/${id}`, {
         method: 'DELETE',
       });
       if (res.ok) fetchDashboardData();
@@ -114,7 +121,7 @@ export default function Dashboard() {
     if (!editTitle.trim()) return;
     setSearching(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cycles/tmdb-search?query=${encodeURIComponent(editTitle)}`);
+      const res = await fetch(`${API_URL}/api/cycles/tmdb-search?query=${encodeURIComponent(editTitle)}`);
       if (res.ok) {
         const data = await res.json();
         setSearchResults(data);
@@ -131,7 +138,7 @@ export default function Dashboard() {
     setUpdating(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/cycles/nominations/${editingNom.id}`, {
+      const res = await fetch(`${API_URL}/api/cycles/nominations/${editingNom.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

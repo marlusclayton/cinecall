@@ -31,6 +31,8 @@ services:
       - "5000:5000"
     env_file:
       - infra/conf/.env
+    volumes:
+      - ./init.sql:/app/init.sql:ro
     depends_on:
       - postgres
       - waha
@@ -41,6 +43,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: cinecall_frontend
     restart: always
     ports:

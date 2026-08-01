@@ -71,8 +71,12 @@ export default function AdminControls({ onRefresh }: { onRefresh: () => void }) 
   const handleSendPoll = async () => {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-poll`, { method: 'POST' });
-    if (res.ok) alert('Enquete múltipla enviada para o WhatsApp!');
-    else alert('Falha ao enviar a enquete.');
+    if (res.ok) {
+      alert('Enquete múltipla enviada para o WhatsApp!');
+    } else {
+      const body = await res.json().catch(() => null);
+      alert(`Falha ao enviar a enquete.${body?.message ? `\n\n${body.message}` : ''}`);
+    }
     setLoading(false);
     onRefresh();
   };
@@ -80,8 +84,12 @@ export default function AdminControls({ onRefresh }: { onRefresh: () => void }) 
   const handleSendTiebreaker = async () => {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-tiebreaker-poll`, { method: 'POST' });
-    if (res.ok) alert('Enquete de desempate (escolha única) enviada para o WhatsApp!');
-    else alert('Falha ao enviar a enquete de desempate.');
+    if (res.ok) {
+      alert('Enquete de desempate (escolha única) enviada para o WhatsApp!');
+    } else {
+      const body = await res.json().catch(() => null);
+      alert(`Falha ao enviar a enquete de desempate.${body?.message ? `\n\n${body.message}` : ''}`);
+    }
     setLoading(false);
     onRefresh();
   };
