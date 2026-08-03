@@ -57,7 +57,7 @@ public class CyclesController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(query)) return BadRequest(new { message = "Query is required." });
 
-        var tmdbApiKey = _config["TMDB_API_KEY"] ?? _config["TmdbApiKey"] ?? "69003860bbc5d83cf3017159998751f9";
+        var tmdbApiKey = _config["TMDB_API_KEY"] ?? _config["TmdbApiKey"];
 
         try
         {
@@ -160,7 +160,7 @@ public class CyclesController : ControllerBase
         nomination.Title = request.Title;
         nomination.IndicatedBy = request.IndicatedBy;
 
-        var tmdbApiKey = _config["TMDB_API_KEY"] ?? _config["TmdbApiKey"] ?? "69003860bbc5d83cf3017159998751f9";
+        var tmdbApiKey = _config["TMDB_API_KEY"] ?? _config["TmdbApiKey"];
 
         if (request.TmdbId.HasValue && request.TmdbId.Value > 0)
         {
