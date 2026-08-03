@@ -53,13 +53,10 @@ INSERT INTO "Categories" ("Name", "Description", "IsActive", "CreatedAt") VALUES
 
 -- Insert Cycle 1 with Category 36 (Lançamentos) and Status 0 (Nominating)
 INSERT INTO "WeeklyCycles" ("Id", "CategoryId", "StartedAt", "Status")
-VALUES (1, 36, NOW(), 0)
+VALUES (1, 36, NOW(), 4)
 , (2, 29, NOW(), 0);
 
 SELECT setval(pg_get_serial_sequence('"WeeklyCycles"', 'Id'), 1);
-
-
-UPDATE "WeeklyCycles" SET "StartedAt" = NOW(), "Status" = 1 WHERE "Id" = 2;
 
 -- Insert 8 Nominations for Cycle 1
 INSERT INTO "Nominations" ("CycleId", "Title", "IndicatedBy", "Overview", "TmdbId", "PosterPath", "CreatedAt") VALUES
@@ -143,4 +140,4 @@ INSERT INTO "Nominations" ("CycleId", "Title", "IndicatedBy", "Overview", "TmdbI
 , (2, 'Que Horas Ela Volta?', 'Pere', 'A pernambucana Val (Regina Casé) se mudou para São Paulo a fim de dar melhores condições de vida para sua filha Jéssica. Com muito receio, ela deixou a menina no interior de Pernambuco para ser babá de Fabinho, morando integralmente na casa de seus patrões. Treze anos depois, quando o menino (Michel Joelsas) vai prestar vestibular, Jéssica (Camila Márdila) lhe telefona, pedindo ajuda para ir à São Paulo, no intuito de prestar a mesma prova. Os chefes de Val recebem a menina de braços abertos, só que quando ela deixa de seguir certo protocolo, circulando livremente, como não deveria, a situação se complica.', 310569, 'https://image.tmdb.org/t/p/w500/d5aIZjwdG87YradTjmtmyZtR1dy.jpg', '2026-08-02 21:27:39.075066-03')
 ;
 
-UPDATE "WeeklyCycles" SET "StartedAt" = NOW(), "WinnerMovieId" = 4 WHERE "Id" = 1;
+UPDATE "WeeklyCycles" SET "WinnerMovieId" = 4 WHERE "Id" = 1;
