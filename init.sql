@@ -54,7 +54,7 @@ INSERT INTO "Categories" ("Name", "Description", "IsActive", "CreatedAt") VALUES
 -- Insert Cycle 1 with Category 36 (Lançamentos) and Status 0 (Nominating)
 INSERT INTO "WeeklyCycles" ("Id", "CategoryId", "StartedAt", "Status")
 VALUES (1, 36, NOW(), 4)
-, (2, 29, NOW(), 0);
+, (2, 31, NOW(), 0);
 
 SELECT setval(pg_get_serial_sequence('"WeeklyCycles"', 'Id'), 1);
 
