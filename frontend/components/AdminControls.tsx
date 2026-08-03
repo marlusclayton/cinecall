@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CategoryManager from './CategoryManager';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -8,6 +9,7 @@ export default function AdminControls({ onRefresh }: { onRefresh: () => void }) 
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const [loading, setLoading] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
 
   const loadCategories = () => {
     fetch(`${API_URL}/api/categories`)
@@ -198,9 +200,23 @@ export default function AdminControls({ onRefresh }: { onRefresh: () => void }) 
             >
               🛑 Nova Roleta
             </button>
+            <button
+              onClick={() => setShowCategoryManager(true)}
+              disabled={loading}
+              className="col-span-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/20 text-xs font-medium py-2 rounded-xl transition"
+            >
+              🗂️ Gerenciar Categorias
+            </button>
           </div>
         </div>
       </div>
+
+      {showCategoryManager && (
+        <CategoryManager
+          onClose={() => setShowCategoryManager(false)}
+          onChange={loadCategories}
+        />
+      )}
     </div>
   );
 }

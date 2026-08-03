@@ -13,7 +13,6 @@ bin/
 obj/
 
 # Local database backups and dump files
-*.sql
 *.dump
 *.tar.gz
 

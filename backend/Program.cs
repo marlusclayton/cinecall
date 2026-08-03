@@ -36,31 +36,10 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MovieClubDbContext>();
-    // NOTE: This project has no EF Core Migrations/ folder committed, so
-    // Database.Migrate() was a silent no-op (zero migrations to apply),
-    // meaning the Categories/WeeklyCycles/Nominations tables were never
-    // created and every query against them failed with "relation does not
-    // exist". EnsureCreated() builds the schema directly from the model
-    // (and applies the Category HasData seed) without needing migration
-    // files. If you later want proper EF migrations, run
-    // `dotnet ef migrations add InitialCreate` and switch this back to
-    // Migrate() - just don't mix EnsureCreated() and Migrate() together.
-    dbContext.Database.EnsureCreated();
-
-    if (!dbContext.Categories.Any())
-    {
-        var seedPath = Path.Combine(AppContext.BaseDirectory, "init.sql");
-        if (File.Exists(seedPath))
-        {
-            var seedSql = File.ReadAllText(seedPath);
-            dbContext.Database.ExecuteSqlRaw(seedSql);
-            Console.WriteLine("Seeded database from init.sql");
-        }
-        else
-        {
-            Console.WriteLine($"No seed file found at {seedPath} - Categories is empty and nothing was seeded.");
-        }
-    }
+    dbContext.Database.Migrate();
+    Console.WriteLine("Database migrated (schema + baseline categories from HasData).");
+    Console.WriteLine("If this is a fresh database and you want your real data (cycles/nominations/full category list),");
+    Console.WriteLine("run init.sql manually now:  docker compose exec -T postgres psql -U <user> -d <db> < init.sql");
 }
 
 app.Run();

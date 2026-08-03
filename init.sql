@@ -48,13 +48,18 @@ INSERT INTO "Categories" ("Name", "Description", "IsActive", "CreatedAt") VALUES
 ('Nicholas Cage', 'Filmes estrelados por Nicolas Cage', true, NOW()),
 ('Adam Sandler', 'Comédias e atuações de Adam Sandler', true, NOW()),
 ('Jackie Chan / Bruce Lee', 'Artes marciais e clássicos de ação', true, NOW()),
-('Dívida de jogo', 'Escolhas de punição ou aposta', true, NOW());
+('Dívida de jogo', 'Escolhas de punição ou aposta', true, NOW()),
+('Monstros', 'Filmes de Vampiros, Lobisomens e etc', true, NOW());
 
 -- Insert Cycle 1 with Category 36 (Lançamentos) and Status 0 (Nominating)
 INSERT INTO "WeeklyCycles" ("Id", "CategoryId", "StartedAt", "Status")
-VALUES (1, 36, NOW(), 0);
+VALUES (1, 36, NOW(), 0)
+, (2, 29, NOW(), 0);
 
 SELECT setval(pg_get_serial_sequence('"WeeklyCycles"', 'Id'), 1);
+
+
+UPDATE "WeeklyCycles" SET "StartedAt" = NOW(), "Status" = 1 WHERE "Id" = 2;
 
 -- Insert 8 Nominations for Cycle 1
 INSERT INTO "Nominations" ("CycleId", "Title", "IndicatedBy", "Overview", "TmdbId", "PosterPath", "CreatedAt") VALUES
@@ -129,4 +134,13 @@ INSERT INTO "Nominations" ("CycleId", "Title", "IndicatedBy", "Overview", "TmdbI
   1119449, 
   'https://image.tmdb.org/t/p/w500/uy9KPHgJpxXHCzn4vPzuGkApzC8.jpg', 
   NOW()
-);
+)
+, (2, 'Morto Não Fala', 'Sarnathy', 'Stênio é plantonista noturno no necrotério de uma grande e violenta cidade. Em suas madrugadas de trabalho, ele nunca está só, pois possui um dom paranormal de comunicação com os mortos. Quando as confidências que ouve do além, contudo, revelam segredos de sua própria vida, Stênio desencadeia uma maldição que traz perigo e morte para perto de si e de sua família.', 515908, 'https://image.tmdb.org/t/p/w500/wGkro5BxdWDe14NeaJe3iH74joV.jpg', '2026-08-02 21:22:38.849416-03')
+, (2, 'C.I.C. - Central de Inteligência Cearense', 'Kebabe', 'Um agente secreto da Central de Inteligência Cearense é a última esperança do Brasil para recuperar os dados roubados de um projeto ultrassecreto, que ameaça destruir as praias do país.', 1210089, 'https://image.tmdb.org/t/p/w500/pRqry4UIbm3De8kfiDj86r9DlBC.jpg', '2026-08-02 21:22:57.717406-03')
+, (2, 'Deus e o Diabo na Terra do Sol', 'Bloom', 'Manuel vive com a esposa Rosa e a mãe, numa vida muito pobre no sertão brasileiro. Numa discussão com o Coronel que controla sua região o rapaz se revolta e mata o poderoso. Sua única opção é fugir deixando o pouco que tem para trás e seguindo o beato Sebastião que promete a bênção de Deus aos seus fiéis. Manuel pode, sem querer, estar novamente entrando em problemas, pois a oligarquia local encomendou a morte de Sebastião e seus seguidores a João das Mortes, com medo que uma situação como a de Canudos se repita.', 67612, 'https://image.tmdb.org/t/p/w500/vBSTJhHcVq5zffTudQ7jMG9vDwI.jpg', '2026-08-02 21:23:14.846182-03')
+, (2, 'Copa de Elite', 'Marcello', 'O policial Jorge Capitão é um competente capitão do BOP e um ídolo brasileiro. Só que depois dele salvar de um sequestro o maior craque argentino, às vésperas da Copa, acaba virando o inimigo público número 1 da nação. Expulso da corporação e desacreditado pelo povo, Capitão precisa reaprender a trabalhar em equipe para evitar um atentado contra o Papa na final do torneio. É quando entra em cena a empresária de sex shop Bia Alpinistinha, um médium e sua mãe muito louca.', 243451, 'https://image.tmdb.org/t/p/w500/yKpmi4dotMAENGVRB4yutItNKxQ.jpg', '2026-08-02 21:24:26.065997-03')
+, (2, 'Cidade de Deus', 'MariaX', 'Buscapé é um jovem morador da Cidade de Deus que cresce em meio à violência. Com medo de se tornar um bandido, enxerga na fotografia uma oportunidade de ter uma vida digna.', 598, 'https://image.tmdb.org/t/p/w500/gfnXixcGC060QcG6JPxN6AMdVsq.jpg', '2026-08-02 21:25:48.624733-03')
+, (2, 'Que Horas Ela Volta?', 'Pere', 'A pernambucana Val (Regina Casé) se mudou para São Paulo a fim de dar melhores condições de vida para sua filha Jéssica. Com muito receio, ela deixou a menina no interior de Pernambuco para ser babá de Fabinho, morando integralmente na casa de seus patrões. Treze anos depois, quando o menino (Michel Joelsas) vai prestar vestibular, Jéssica (Camila Márdila) lhe telefona, pedindo ajuda para ir à São Paulo, no intuito de prestar a mesma prova. Os chefes de Val recebem a menina de braços abertos, só que quando ela deixa de seguir certo protocolo, circulando livremente, como não deveria, a situação se complica.', 310569, 'https://image.tmdb.org/t/p/w500/d5aIZjwdG87YradTjmtmyZtR1dy.jpg', '2026-08-02 21:27:39.075066-03')
+;
+
+UPDATE "WeeklyCycles" SET "StartedAt" = NOW(), "WinnerMovieId" = 4 WHERE "Id" = 1;
