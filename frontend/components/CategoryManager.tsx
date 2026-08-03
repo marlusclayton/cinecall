@@ -235,14 +235,14 @@ export default function CategoryManager({
                     >
                       ✏️
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDelete(cat)}
                       disabled={loading}
                       title="Excluir"
                       className="bg-slate-800 hover:bg-slate-700 text-rose-400 text-[11px] font-medium px-2.5 py-1 rounded-lg transition"
                     >
                       🗑️
-                    </button>
+                    </button> */}
                   </div>
                 </>
               )}
