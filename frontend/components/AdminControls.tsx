@@ -5,7 +5,11 @@ import CategoryManager from './CategoryManager';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
-export default function AdminControls({ onRefresh }: { onRefresh: () => void }) {
+interface AdminControlsProps {
+  onRefresh: () => void;
+}
+
+export default function AdminControls({ onRefresh }: AdminControlsProps) {
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const [loading, setLoading] = useState(false);

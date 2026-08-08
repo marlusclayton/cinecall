@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState, useEffect } from 'react';
 import SpinWheel from '@/components/SpinWheel';
 import NominationForm from '@/components/NominationForm';
@@ -15,7 +16,7 @@ interface Nomination {
   title: string;
   indicatedBy: string;
   overview: string;
-  posterUrl: string;
+  posterPath: string;
 }
 
 interface Cycle {
@@ -254,7 +255,7 @@ export default function Dashboard() {
                     >
                       {/* Classic Compact Poster (w-14 h-20) */}
                       <img 
-                        src={nom.posterUrl || PLACEHOLDER_POSTER} 
+                        src={nom.posterPath || PLACEHOLDER_POSTER} 
                         alt={nom.title} 
                         onError={(e) => {
                           e.currentTarget.onerror = null;
