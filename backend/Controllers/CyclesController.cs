@@ -232,7 +232,9 @@ public class CyclesController : ControllerBase
         var activeCycle = await _context.WeeklyCycles
             .Include(c => c.Category)
             .Include(c => c.Nominations)
-            .FirstOrDefaultAsync(c => c.Status != CycleStatus.Completed);
+            .Where(c => c.Status != CycleStatus.Completed)
+            .OrderByDescending(c => c.StartedAt)
+            .FirstOrDefaultAsync();
 
         if (activeCycle == null)
             return BadRequest(new { message = "Nenhum ciclo ativo." });
@@ -268,7 +270,9 @@ public class CyclesController : ControllerBase
     {
         var activeCycle = await _context.WeeklyCycles
             .Include(c => c.Nominations)
-            .FirstOrDefaultAsync(c => c.Status != CycleStatus.Completed);
+            .Where(c => c.Status != CycleStatus.Completed)
+            .OrderByDescending(c => c.StartedAt)
+            .FirstOrDefaultAsync();
 
         if (activeCycle == null)
             return BadRequest(new { message = "Nenhum ciclo ativo." });
@@ -306,7 +310,9 @@ public class CyclesController : ControllerBase
     {
         var activeCycle = await _context.WeeklyCycles
             .Include(c => c.Nominations)
-            .FirstOrDefaultAsync(c => c.Status != CycleStatus.Completed);
+            .Where(c => c.Status != CycleStatus.Completed)
+            .OrderByDescending(c => c.StartedAt)
+            .FirstOrDefaultAsync();
 
         if (activeCycle == null)
             return BadRequest(new { message = "Nenhum ciclo ativo." });
@@ -399,7 +405,9 @@ public class CyclesController : ControllerBase
     public async Task<IActionResult> CompleteCycle()
     {
         var active = await _context.WeeklyCycles
-            .FirstOrDefaultAsync(c => c.Status != CycleStatus.Completed);
+            .Where(c => c.Status != CycleStatus.Completed)
+            .OrderByDescending(c => c.StartedAt)
+            .FirstOrDefaultAsync();
 
         if (active != null)
         {
