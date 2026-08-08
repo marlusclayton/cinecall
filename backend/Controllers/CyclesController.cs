@@ -328,7 +328,7 @@ public class CyclesController : ControllerBase
             {
                 name = pollTitle,
                 options = options,
-                selectableOptionsCount = multipleSelection ? 0 : 1
+                multipleAnswers = multipleSelection
             }
         };
 

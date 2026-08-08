@@ -1,27 +1,32 @@
+x-shared: &default-env
+  env_file:
+    - path: infra/conf/.env
+      required: true
+    - path: infra/conf/.env.local
+      required: false
+
 services:
   postgres:
     image: postgres:16-alpine
     container_name: cinecall_db
     restart: always
-    env_file:
-      - infra/conf/.env
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - cinecall_net
+    <<: *default-env
 
   waha:
     image: devlikeapro/waha:latest
     container_name: cinecall_waha
     restart: always
-    env_file:
-      - infra/conf/.env
     ports:
       - "3000:3000"
     networks:
       - cinecall_net
+    <<: *default-env
 
   backend:
     build:
@@ -31,8 +36,6 @@ services:
     restart: always
     ports:
       - "5000:5000"
-    env_file:
-      - infra/conf/.env
     volumes:
       - ./init.sql:/app/init.sql:ro
     depends_on:
@@ -40,6 +43,7 @@ services:
       - waha
     networks:
       - cinecall_net
+    <<: *default-env
 
   frontend:
     build:
@@ -51,8 +55,7 @@ services:
     restart: always
     ports:
       - "8080:3000"
-    env_file:
-      - infra/conf/.env
+    <<: *default-env
 
 volumes:
   postgres_data:
