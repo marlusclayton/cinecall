@@ -16,7 +16,7 @@ interface Nomination {
   title: string;
   indicatedBy: string;
   overview: string;
-  posterPath: string;
+  posterUrl: string;
 }
 
 interface Cycle {
@@ -255,7 +255,7 @@ export default function Dashboard() {
                     >
                       {/* Classic Compact Poster (w-14 h-20) */}
                       <img 
-                        src={nom.posterPath || PLACEHOLDER_POSTER} 
+                        src={nom.posterUrl || PLACEHOLDER_POSTER} 
                         alt={nom.title} 
                         onError={(e) => {
                           e.currentTarget.onerror = null;

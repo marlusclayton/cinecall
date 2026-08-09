@@ -33,3 +33,21 @@ docker compose build --no-cache
 docker compose up -d
 docker compose logs backend
 docker compose exec -T postgres psql -U <user> -d <db> < init.sql
+
+--local only
+docker compose down
+
+docker compose up -d postgres waha
+cd backend
+export ConnectionStrings__DefaultConnection="Host=localhost;Port=5432;Database=<db>>;Username=<user>>;Password=<password>"
+export WAHA_URL="http://localhost:3000"
+export ASPNETCORE_URLS="http://localhost:5000"
+dotnet run
+
+dotnet tool install --global dotnet-ef   # if not already installed
+dotnet ef database update
+
+cd frontend
+echo "NEXT_PUBLIC_API_URL=http://localhost:5000" > .env.local
+npm install
+npm run dev

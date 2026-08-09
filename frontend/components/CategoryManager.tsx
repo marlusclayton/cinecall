@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
+import { useToast } from './ToastProvider';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -27,6 +28,7 @@ export default function CategoryManager({
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const showToast = useToast();
 
   const loadCategories = () => {
     setLoading(true);
@@ -60,7 +62,7 @@ export default function CategoryManager({
       notifyChange();
     } else {
       const body = await res.json().catch(() => null);
-      alert(body?.message || 'Falha ao criar categoria.');
+      showToast(body?.message || 'Falha ao criar categoria.', 'error');
       setLoading(false);
     }
   };
@@ -90,7 +92,7 @@ export default function CategoryManager({
       notifyChange();
     } else {
       const body = await res.json().catch(() => null);
-      alert(body?.message || 'Falha ao atualizar categoria.');
+      showToast(body?.message || 'Falha ao atualizar categoria.', 'error');
       setLoading(false);
     }
   };
@@ -101,7 +103,7 @@ export default function CategoryManager({
     if (res.ok) {
       notifyChange();
     } else {
-      alert('Falha ao alterar status da categoria.');
+      showToast('Falha ao alterar status da categoria.', 'error');
       setLoading(false);
     }
   };
@@ -114,7 +116,7 @@ export default function CategoryManager({
       notifyChange();
     } else {
       const body = await res.json().catch(() => null);
-      alert(body?.message || 'Falha ao excluir categoria.');
+      showToast(body?.message || 'Falha ao excluir categoria.', 'error');
       setLoading(false);
     }
   };

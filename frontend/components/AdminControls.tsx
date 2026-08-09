@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import CategoryManager from './CategoryManager';
+import { useToast } from './ToastProvider';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
@@ -14,6 +15,7 @@ export default function AdminControls({ onRefresh }: AdminControlsProps) {
   const [selectedCategory, setSelectedCategory] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const showToast = useToast();
 
   const loadCategories = () => {
     fetch(`${API_URL}/api/categories`)
@@ -56,11 +58,15 @@ export default function AdminControls({ onRefresh }: AdminControlsProps) {
     onRefresh();
   };
 
-  const handleSendSummary = async () => {
+ const handleSendSummary = async () => {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-summary`, { method: 'POST' });
-    if (res.ok) alert('Resumo completo enviado para o WhatsApp!');
-    else alert('Falha ao enviar o resumo.');
+    if (res.ok) {
+      showToast('Resumo completo enviado para o WhatsApp!', 'success');
+    } else {
+      const body = await res.json().catch(() => null);
+      showToast(`Falha ao enviar o resumo.${body?.message ? `\n${body.message}` : ''}`, 'error');
+    }
     setLoading(false);
     onRefresh();
   };
@@ -68,8 +74,12 @@ export default function AdminControls({ onRefresh }: AdminControlsProps) {
   const handleSendList = async () => {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-list`, { method: 'POST' });
-    if (res.ok) alert('Lista simples (filme - indicador) enviada para o WhatsApp!');
-    else alert('Falha ao enviar a lista simples.');
+    if (res.ok) {
+      showToast('Lista simples (filme - indicador) enviada para o WhatsApp!', 'success');
+    } else {
+      const body = await res.json().catch(() => null);
+      showToast(`Falha ao enviar a lista simples.${body?.message ? `\n${body.message}` : ''}`, 'error');
+    }
     setLoading(false);
     onRefresh();
   };
@@ -78,10 +88,10 @@ export default function AdminControls({ onRefresh }: AdminControlsProps) {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-poll`, { method: 'POST' });
     if (res.ok) {
-      alert('Enquete múltipla enviada para o WhatsApp!');
+      showToast('Enquete múltipla enviada para o WhatsApp!', 'success');
     } else {
       const body = await res.json().catch(() => null);
-      alert(`Falha ao enviar a enquete.${body?.message ? `\n\n${body.message}` : ''}`);
+      showToast(`Falha ao enviar a enquete.${body?.message ? `\n${body.message}` : ''}`, 'error');
     }
     setLoading(false);
     onRefresh();
@@ -91,10 +101,10 @@ export default function AdminControls({ onRefresh }: AdminControlsProps) {
     setLoading(true);
     const res = await fetch(`${API_URL}/api/cycles/send-tiebreaker-poll`, { method: 'POST' });
     if (res.ok) {
-      alert('Enquete de desempate (escolha única) enviada para o WhatsApp!');
+      showToast('Enquete de desempate (escolha única) enviada para o WhatsApp!', 'success');
     } else {
       const body = await res.json().catch(() => null);
-      alert(`Falha ao enviar a enquete de desempate.${body?.message ? `\n\n${body.message}` : ''}`);
+      showToast(`Falha ao enviar a enquete de desempate.${body?.message ? `\n${body.message}` : ''}`, 'error');
     }
     setLoading(false);
     onRefresh();
