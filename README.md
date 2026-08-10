@@ -13,8 +13,12 @@ connect to the app and enjoy :)
 
 # few reference commands
 
+- restore backup
+docker compose exec -T postgres psql -U <user> -d <db> < backups/backup_yyyymmdd_HHMMSS.sql
+
 - build backend
 docker compose build --no-cache backend
+docker compose up -d
 
 - list all tables
 docker compose exec postgres psql -U <user> -d <db> -c '\dt'

@@ -22,8 +22,15 @@ builder.Services.AddDbContext<MovieClubDbContext>(options =>
         npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(MovieClubDbContext).Assembly.FullName)
     ));
 
-builder.Services.Configure<TmdbOptions>(builder.Configuration.GetSection("Tmdb"));
-builder.Services.AddHttpClient<ITmdbService, TmdbService>();
+builder.Services.Configure<TmdbOptions>(options =>
+{
+    options.ApiKey = builder.Configuration["TMDB_API_KEY"] ?? string.Empty;
+});
+builder.Services.AddHttpClient<ITmdbService, TmdbService>((sp, client) =>
+{
+    var tmdbOptions = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<TmdbOptions>>().Value;
+    client.BaseAddress = new Uri(tmdbOptions.BaseUrl);
+});
 
 var app = builder.Build();
 

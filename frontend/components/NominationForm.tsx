@@ -2,35 +2,51 @@
 
 import React, { useState } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 interface NominationFormProps {
   cycleId: number;
   onSubmitted: () => void;
 }
+
+interface TmdbResult {
+  tmdbId: number;
+  title: string;
+  overview: string;
+  fullPosterUrl: string;
+  releaseYear: string | null;
+}
+
+const PLACEHOLDER_POSTER = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='150' viewBox='0 0 100 150'><rect width='100' height='150' fill='%231e293b'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-size='24'>🎬</text></svg>";
 
 export default function NominationForm({ cycleId, onSubmitted }: NominationFormProps) {
   const [title, setTitle] = useState('');
   const [indicatedBy, setIndicatedBy] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !indicatedBy.trim()) return;
+  const [showDisambiguation, setShowDisambiguation] = useState(false);
+  const [searchResults, setSearchResults] = useState<TmdbResult[]>([]);
+  const [noMatchFound, setNoMatchFound] = useState(false);
 
+  const createNomination = async (tmdbId: number | null, customTitle: string | null) => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/nominations`, {
+      const body = tmdbId
+        ? { cycleId, indicatedBy, tmdbId }
+        : { cycleId, indicatedBy, customTitle: customTitle ?? title };
+
+      const res = await fetch(`${API_URL}/api/nominations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          cycleId,
-          title,
-          indicatedBy,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
         setTitle('');
         setIndicatedBy('');
+        setShowDisambiguation(false);
+        setSearchResults([]);
+        setNoMatchFound(false);
         onSubmitted();
       }
     } catch (err) {
@@ -38,6 +54,43 @@ export default function NominationForm({ cycleId, onSubmitted }: NominationFormP
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !indicatedBy.trim()) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/nominations/search-tmdb?query=${encodeURIComponent(title)}`);
+      const results: TmdbResult[] = res.ok ? await res.json() : [];
+
+      if (results.length === 1) {
+        await createNomination(results[0].tmdbId, null);
+      } else if (results.length === 0) {
+        setNoMatchFound(true);
+        setSearchResults([]);
+        setShowDisambiguation(true);
+        setLoading(false);
+      } else {
+        setNoMatchFound(false);
+        setSearchResults(results);
+        setShowDisambiguation(true);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('TMDB search error:', err);
+      setNoMatchFound(true);
+      setSearchResults([]);
+      setShowDisambiguation(true);
+      setLoading(false);
+    }
+  };
+
+  const closeDisambiguation = () => {
+    setShowDisambiguation(false);
+    setSearchResults([]);
+    setNoMatchFound(false);
   };
 
   return (
@@ -97,15 +150,70 @@ export default function NominationForm({ cycleId, onSubmitted }: NominationFormP
           {loading ? (
             <>
               <div className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-              <span>Cadastrando...</span>
+              <span>Buscando no TMDB...</span>
             </>
           ) : (
-            <>
-              <span>+ Indicar Filme</span>
-            </>
+            <span>+ Indicar Filme</span>
           )}
         </button>
       </form>
+
+      {showDisambiguation && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#121826] border border-slate-800 rounded-3xl p-6 max-w-lg w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-base font-bold text-white border-b border-slate-800 pb-2">
+              {noMatchFound ? '🤔 Nenhuma correspondência encontrada' : '🎬 Vários filmes encontrados'}
+            </h3>
+
+            <p className="text-xs text-slate-400">
+              {noMatchFound
+                ? `Não encontramos "${title}" no TMDB. Você pode adicionar mesmo assim (sem pôster/sinopse automáticos).`
+                : 'Selecione a versão correta, ou adicione sem correspondência TMDB:'}
+            </p>
+
+            {searchResults.length > 0 && (
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                {searchResults.map((result) => (
+                  <div
+                    key={result.tmdbId}
+                    onClick={() => createNomination(result.tmdbId, null)}
+                    className="flex items-center gap-3 p-2.5 rounded-xl cursor-pointer border bg-slate-900 border-slate-800 hover:border-amber-400/50 text-slate-300 transition"
+                  >
+                    <img
+                      src={result.fullPosterUrl || PLACEHOLDER_POSTER}
+                      alt={result.title}
+                      className="w-10 h-14 object-cover rounded-lg flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-bold text-xs truncate text-white">
+                        {result.title} {result.releaseYear ? `(${result.releaseYear})` : ''}
+                      </h5>
+                      <p className="text-[10px] text-slate-400 line-clamp-2">{result.overview}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                onClick={closeDisambiguation}
+                disabled={loading}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-mono rounded-xl transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => createNomination(null, title)}
+                disabled={loading}
+                className="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-bold font-mono rounded-xl transition"
+              >
+                {loading ? 'Salvando...' : 'Adicionar sem TMDB'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
