@@ -2,16 +2,18 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
-interface Category {
-  id: string;
+export interface Category {
+  id: number | string;
   name: string;
 }
 
-interface SpinWheelProps {
-  items: Category[];
-  winningCategory: Category | null;
-  isSpinning: boolean;
-  onSpinEnd: () => void;
+export interface SpinWheelProps {
+  categories?: any[];
+  items?: any[];
+  winningCategory?: any | null;
+  isSpinning?: boolean;
+  onSpinEnd?: () => void;
+  onCategorySelected?: (category: any) => void | Promise<void>;
 }
 
 const COLORS = [
@@ -20,31 +22,35 @@ const COLORS = [
 ];
 
 export const SpinWheel: React.FC<SpinWheelProps> = ({
+  categories,
   items,
   winningCategory,
-  isSpinning,
-  onSpinEnd
+  isSpinning = false,
+  onSpinEnd,
+  onCategorySelected
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [rotation, setRotation] = useState(0);
 
+  // Usa `categories` ou `items` (o que for passado via prop)
+  const wheelItems = categories || items || [];
+
   // Desenha a roleta no Canvas
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || items.length === 0) return;
+    if (!canvas || wheelItems.length === 0) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const numItems = items.length;
+    const numItems = wheelItems.length;
     const arc = (2 * Math.PI) / numItems;
     const radius = canvas.width / 2;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    items.forEach((item, i) => {
-      // Ajustamos o ângulo inicial para compensar o topo (-PI / 2)
-      // Assim a primeira fatia (índice 0) fica perfeitamente centrada no topo a 12h
+    wheelItems.forEach((item, i) => {
+      // Compensação de -Math.PI / 2 para alinhar a fatia 0 no topo (12h)
       const angle = i * arc - Math.PI / 2;
 
       // Fatia
@@ -65,37 +71,49 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({
       ctx.translate(radius, radius);
       ctx.rotate(angle + arc / 2);
       ctx.textAlign = 'right';
-      ctx.fillText(item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name, radius - 30, 5);
+      ctx.fillText(
+        item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name,
+        radius - 30,
+        5
+      );
       ctx.restore();
     });
-  }, [items]);
+  }, [wheelItems]);
 
   // Animação de Giro e Alinhamento
   useEffect(() => {
     if (isSpinning && winningCategory) {
-      const winnerIndex = items.findIndex(item => item.id === winningCategory.id);
+      const winnerIndex = wheelItems.findIndex(
+        item => String(item.id) === String(winningCategory.id)
+      );
+
       if (winnerIndex !== -1) {
-        const numItems = items.length;
+        const numItems = wheelItems.length;
         const sliceAngle = 360 / numItems;
 
-        // Como alinhamos o ponto 0 no topo no canvas:
-        // O centro do item `i` está na Posição (i * sliceAngle + sliceAngle / 2)
+        // Centraliza a fatia sorteada embaixo do ponteiro (12h)
         const winnerCenter = (winnerIndex * sliceAngle) + (sliceAngle / 2);
-
-        // Para trazer o item sorteado ao topo, giramos no sentido horário
         const degreesToDegrees = 360 - winnerCenter;
 
-        // Adiciona 5 voltas completas para o efeito visual
+        // 5 voltas completas para o efeito visual
         const extraSpins = 360 * 5;
         
-        // Mantém o progresso acumulado da rotação anterior
         const currentMod = rotation % 360;
         const targetRotation = rotation + (360 - currentMod) + extraSpins + degreesToDegrees;
 
         setRotation(targetRotation);
       }
     }
-  }, [isSpinning, winningCategory, items]);
+  }, [isSpinning, winningCategory, wheelItems]);
+
+  const handleTransitionEnd = () => {
+    if (onSpinEnd) {
+      onSpinEnd();
+    }
+    if (winningCategory && onCategorySelected) {
+      onCategorySelected(winningCategory);
+    }
+  };
 
   return (
     <div className="relative flex flex-col items-center justify-center my-8">
@@ -108,7 +126,7 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({
           transform: `rotate(${rotation}deg)`,
           transition: isSpinning ? 'transform 4s cubic-bezier(0.15, 0.90, 0.20, 1.00)' : 'none'
         }}
-        onTransitionEnd={onSpinEnd}
+        onTransitionEnd={handleTransitionEnd}
       >
         <canvas
           ref={canvasRef}
@@ -120,3 +138,5 @@ export const SpinWheel: React.FC<SpinWheelProps> = ({
     </div>
   );
 };
+
+export default SpinWheel;
