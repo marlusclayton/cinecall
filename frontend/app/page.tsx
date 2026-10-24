@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useState, useEffect } from 'react';
-import SpinWheel from '@/components/SpinWheel';
+import { SpinWheel } from '@/components/SpinWheel';
 import NominationForm from '@/components/NominationForm';
 import AdminControls from '@/components/AdminControls';
 
