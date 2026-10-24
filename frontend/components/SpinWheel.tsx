@@ -1,182 +1,122 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface SpinWheelProps {
-  categories: Category[];
-  onCategorySelected: (category: Category) => void;
+  items: Category[];
+  winningCategory: Category | null;
+  isSpinning: boolean;
+  onSpinEnd: () => void;
 }
 
-const VIBRANT_COLORS = [
-  '#6366f1', '#06b6d4', '#10b981', '#f59e0b',
-  '#ec4899', '#8b5cf6', '#f43f5e', '#14b8a6',
-  '#3b82f6', '#a855f7', '#84cc16', '#fb923c',
+const COLORS = [
+  '#E50914', '#141414', '#B81D24', '#221F1F', 
+  '#F5C518', '#333333', '#E50914', '#564D4D'
 ];
 
-export default function SpinWheel({ categories, onCategorySelected }: SpinWheelProps) {
-  const [spinning, setSpinning] = useState(false);
-  const [winner, setWinner] = useState<Category | null>(null);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const currentRotationRef = useRef(0);
+export const SpinWheel: React.FC<SpinWheelProps> = ({
+  items,
+  winningCategory,
+  isSpinning,
+  onSpinEnd
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [rotation, setRotation] = useState(0);
 
-  const drawWheel = (rotationAngle = 0) => {
+  // Desenha a roleta no Canvas
+  useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || categories.length === 0) return;
+    if (!canvas || items.length === 0) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const numSlices = categories.length;
-    const sliceAngle = (2 * Math.PI) / numSlices;
-    const width = canvas.width;
-    const height = canvas.height;
-    const center = width / 2;
-    const radius = center - 18;
+    const numItems = items.length;
+    const arc = (2 * Math.PI) / numItems;
+    const radius = canvas.width / 2;
 
-    ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    categories.forEach((cat, index) => {
-      const startAngle = rotationAngle + index * sliceAngle;
-      const endAngle = startAngle + sliceAngle;
+    items.forEach((item, i) => {
+      // Ajustamos o ângulo inicial para compensar o topo (-PI / 2)
+      // Assim a primeira fatia (índice 0) fica perfeitamente centrada no topo a 12h
+      const angle = i * arc - Math.PI / 2;
 
+      // Fatia
       ctx.beginPath();
-      ctx.moveTo(center, center);
-      ctx.arc(center, center, radius, startAngle, endAngle);
-      ctx.closePath();
-
-      ctx.fillStyle = VIBRANT_COLORS[index % VIBRANT_COLORS.length];
+      ctx.fillStyle = COLORS[i % COLORS.length];
+      ctx.moveTo(radius, radius);
+      ctx.arc(radius, radius, radius - 10, angle, angle + arc);
+      ctx.lineTo(radius, radius);
       ctx.fill();
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = '#090d16';
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Render Text
+      // Texto
       ctx.save();
-      ctx.translate(center, center);
-      ctx.rotate(startAngle + sliceAngle / 2);
+      ctx.fillStyle = '#FFF';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.translate(radius, radius);
+      ctx.rotate(angle + arc / 2);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#ffffff';
-
-      // Enhanced font size for crisp reading
-      const fontSize = numSlices > 35 ? 12 : numSlices > 20 ? 13 : 15;
-      ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
-      
-      const maxTextWidth = radius - 42;
-      ctx.fillText(cat.name, radius - 18, 4, maxTextWidth);
+      ctx.fillText(item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name, radius - 30, 5);
       ctx.restore();
     });
+  }, [items]);
 
-    // Outer border ring
-    ctx.beginPath();
-    ctx.arc(center, center, radius, 0, 2 * Math.PI);
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = '#1e293b';
-    ctx.stroke();
-
-    // Gold Accent Ring
-    ctx.beginPath();
-    ctx.arc(center, center, radius + 3, 0, 2 * Math.PI);
-    ctx.lineWidth = 2.5;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.stroke();
-
-    // Center peg
-    ctx.beginPath();
-    ctx.arc(center, center, 32, 0, 2 * Math.PI);
-    ctx.fillStyle = '#090d16';
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.stroke();
-  };
-
+  // Animação de Giro e Alinhamento
   useEffect(() => {
-    drawWheel(currentRotationRef.current);
-  }, [categories]);
+    if (isSpinning && winningCategory) {
+      const winnerIndex = items.findIndex(item => item.id === winningCategory.id);
+      if (winnerIndex !== -1) {
+        const numItems = items.length;
+        const sliceAngle = 360 / numItems;
 
-  const spin = () => {
-    if (spinning || categories.length === 0) return;
+        // Como alinhamos o ponto 0 no topo no canvas:
+        // O centro do item `i` está na Posição (i * sliceAngle + sliceAngle / 2)
+        const winnerCenter = (winnerIndex * sliceAngle) + (sliceAngle / 2);
 
-    setSpinning(true);
-    setWinner(null);
+        // Para trazer o item sorteado ao topo, giramos no sentido horário
+        const degreesToDegrees = 360 - winnerCenter;
 
-    const numSlices = categories.length;
-    const sliceAngle = (2 * Math.PI) / numSlices;
+        // Adiciona 5 voltas completas para o efeito visual
+        const extraSpins = 360 * 5;
+        
+        // Mantém o progresso acumulado da rotação anterior
+        const currentMod = rotation % 360;
+        const targetRotation = rotation + (360 - currentMod) + extraSpins + degreesToDegrees;
 
-    const selectedIndex = Math.floor(Math.random() * numSlices);
-    const selectedCat = categories[selectedIndex];
-
-    const extraSpins = 6 + Math.floor(Math.random() * 4);
-    const targetSliceCenterAngle = selectedIndex * sliceAngle + sliceAngle / 2;
-    const targetRotation = extraSpins * 2 * Math.PI + (2 * Math.PI - targetSliceCenterAngle);
-
-    const startRotation = currentRotationRef.current % (2 * Math.PI);
-    const totalRotationToAnimate = targetRotation - startRotation;
-
-    const duration = 5000;
-    const startTime = performance.now();
-
-    const animate = (now: number) => {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentAngle = startRotation + totalRotationToAnimate * easeOut;
-
-      currentRotationRef.current = currentAngle;
-      drawWheel(currentAngle);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setSpinning(false);
-        setWinner(selectedCat);
-        setTimeout(() => {
-          onCategorySelected(selectedCat);
-        }, 1200);
+        setRotation(targetRotation);
       }
-    };
-
-    requestAnimationFrame(animate);
-  };
+    }
+  }, [isSpinning, winningCategory, items]);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-4 py-2">
-      <div className="relative flex items-center justify-center">
-        {/* Sleek Golden Indicator Pointer */}
-        <div 
-          className="absolute -top-3.5 z-20 w-0 h-0 
-            border-l-[14px] border-l-transparent 
-            border-r-[14px] border-r-transparent 
-            border-t-[26px] border-t-amber-400 filter drop-shadow-lg" 
-        />
+    <div className="relative flex flex-col items-center justify-center my-8">
+      {/* Ponteiro no topo (12 horas) */}
+      <div className="absolute top-0 z-10 w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-t-[30px] border-t-yellow-500 drop-shadow-md" />
 
-        {/* Restored Large Wheel Canvas (480px - 520px) */}
+      {/* Roda da Roleta */}
+      <div
+        style={{
+          transform: `rotate(${rotation}deg)`,
+          transition: isSpinning ? 'transform 4s cubic-bezier(0.15, 0.90, 0.20, 1.00)' : 'none'
+        }}
+        onTransitionEnd={onSpinEnd}
+      >
         <canvas
           ref={canvasRef}
-          width={600}
-          height={600}
-          className="w-[380px] h-[380px] sm:w-[460px] sm:h-[460px] lg:w-[500px] lg:h-[500px] max-w-full drop-shadow-2xl transition-all"
+          width={400}
+          height={400}
+          className="rounded-full shadow-2xl border-4 border-gray-800"
         />
       </div>
-
-      <button
-        onClick={spin}
-        disabled={spinning || categories.length === 0}
-        className="px-8 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs tracking-wider uppercase rounded-xl shadow-lg transform active:scale-95 transition disabled:opacity-50"
-      >
-        {spinning ? 'Sorteando...' : '🎡 Girar Roleta'}
-      </button>
-
-      {winner && (
-        <div className="animate-fade-in text-xs font-bold text-amber-300 bg-amber-400/10 border border-amber-400/30 px-5 py-2 rounded-xl">
-          Categoria selecionada: {winner.name}
-        </div>
-      )}
     </div>
   );
-}
+};
